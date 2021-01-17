@@ -1,2 +1,2 @@
-# Among-Us-Skript
-The GitHub page for the Among Us skript.
+# ImpostersMC Skript
+The GitHub page for the ImpostersMC Skript.
