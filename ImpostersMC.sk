@@ -1,5 +1,5 @@
 # Created by Creaous on 3/01/2021
-# Last edited by Creaous on 17/01/2021 at 9:00 PM
+# Last edited by Creaous on 21/01/2021 at 10:38 PM
 
 # DO NOT RE-EDIT THE CODE AND RE-UPLOAD, IT WILL BE TAKEN DOWN.
 # This code is not for commerical use, do not sell, only use.
@@ -8,57 +8,13 @@
 
 # DISCLAIMER: This is a BETA build meaning stuff in this build is NOT FINAL.
 # This Skript is still in its early ages and bugs may occur, please use the github issues page or DM me on SpigotMC.
-# https://github.com/Creaous/ImpostersMC-Skript
+# https://github.com/Creaous/ImpostersMC-Skript/issues
 
 options:
-	# ---------------
-	# GENERAL CONFIG:
-	# ---------------
-
-	# The world the game will take place in.
-	World: world
-
-	# ----------
-	# COOLDOWNS:
-	# ----------
-
-	# -- SABOTAGES: --
-	# Sabotage Cooldown for Lights.
-	SabotageCooldown_Lights: 30
-	# Sabotage Cooldown for O2.
-	SabotageCooldown_O2: 30
-	# Sabotage Cooldown for Comms.
-	SabotageCooldown_Comms: 30
-
-	# -- OTHERS: --
-
-	# The cooldown for the emergency meeting in seconds.
-	EmergencyMeetingCooldown: 60 # 60 good
-	# Emergency meeting time.
-	EmergencyMeeting: 60 # 60 good
-	# The vote timers time (same as emergency meeting).
-	VoteTimer: 60 # 60 good
-	# The cooldown for the kills (imposter) in seconds.
-	KillCooldown: 35 # 35 good
-
-	# -----------------------
-	# MORE ADVANCED FEATURES:
-	# -----------------------
-
-	# The default permission set.
-	Perm: impostersmc
-	# The hoster permission.
-	HostPerm: impostersmc.hoster
-
-	# ------------
-	# DO NOT EDIT:
-	# ------------
-
 	# The version of the plugin.
-	Version: 1.0.0-beta.2
+	Version: 1.0.0-beta.4-dev
 	# The type (Premium or Open-Source)
 	Type: Open-Source
-
 
 # CREDITS:
 # All credits marked with (J) mean Java Account, all ones marked with (B) mean Xbox Account.
@@ -74,8 +30,10 @@ options:
 # PLUGINS CREDITS:
 # CCTV Plugin - Timdecoole123 - https://www.spigotmc.org/resources/security-camera-plugin-cctv-1-12-1-16-2.60310/
 # Tablisknu - TIatoani - https://forums.skunity.com/resources/tablisknu.727/
-# Skript - Njol (SkriptLang fork) - https://github.com/SkriptLang/Skript/releases/latest
-# SkQuery - RealGatt (LimeGlass fork) - https://www.spigotmc.org/resources/skquery-1-9-1-16.36631/
+# Skript - SkriptLang fork - https://github.com/SkriptLang/Skript/releases/latest
+# SkBee - ShaneBee - https://github.com/ShaneBeee/SkBee/releases/latest
+# Reqn - btk5h - https://github.com/btk5h/reqn/releases/latest
+# Skent - Olyno - https://github.com/Olyno/skent/releases/latest
 # ProtocolLib - dmulloy2 and aadnk - https://www.spigotmc.org/resources/protocollib.1997/
 
 
@@ -107,27 +65,24 @@ options:
 
 # COMMANDS:
 
-command /start:
-	permission: {@HostPerm}
-	permission message: &cYou are lacking the permission node: &6{@HostPerm}&c, please contact the server administrator.
+command /build:
+	permission: ImpostersMC.Build
+	permission message: &cYou are lacking the permission node: &eImpostersMC.Build &8| &cPlease contact the server administrator.
 	trigger:
-		if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
-			# Use the start game function with the player as the argument.
-			startGame(player)
+		send "%{ImpostersMC::EmergencyMeeting::Time}%"
+		send "%{OPTIONS::Default::MeetingCooldown}%"
+		if {OPTIONS::General::EnableBuildMode} is true:
+			if {ImpostersMC::BuildMode::Enabled::%player%} is not set:
+				set {ImpostersMC::BuildMode::Enabled::%player%} to true
+				send "&a&lEnabled build mode!"
+			else if {ImpostersMC::BuildMode::Enabled::%player%} is false:
+				set {ImpostersMC::BuildMode::Enabled::%player%} to true
+				send "&a&lEnabled build mode!"
+			else if {ImpostersMC::BuildMode::Enabled::%player%} is true:
+				set {ImpostersMC::BuildMode::Enabled::%player%} to false
+				send "&c&lDisabled build mode!"
 		else:
-			send "%{ImpostersMC::SecurityCheck::ishallnotsteal::MessageAdmin}%"
-
-
-
-command /end:
-	permission: {@HostPerm}
-	permission message: &cYou are lacking the permission node: &6{@HostPerm}&c, please contact the server administrator.
-	trigger:
-		if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
-			# Use the end game function with the player as the argument.
-			endGame(player)
-		else:
-			send "%{ImpostersMC::SecurityCheck::ishallnotsteal::MessageAdmin}%"
+			send "&c&l(!) &6The server's administrator has build mode disabled, they may be using a third-party plugin."
 
 
 
@@ -136,31 +91,115 @@ command /sabotage [<text>]:
 		if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 			if {ImpostersMC::Game::Imposters::*} contains player:
 				# If the 1st argument is "lights".
-				if argument 1 is "lights":
+				if argument 1 is "Lights":
 					# Set the block at a location to air (the redstone block).
-					set block at location(109, 38, 352, "{@World}" parsed as world) to air
+					set block at location(109, 38, 352, "%{OPTIONS::General::World}%" parsed as world) to air
 					# Use the sabotage function with the argument as "lights".
-					sabotage(player, "lights")
+					sabotage(player, "Lights")
 				# Else if the 1st argument is "comms".
-				else if argument 1 is "comms":
+				else if argument 1 is "Comms":
 					# Use the sabotage function with the argument as "comms".
-					sabotage(player, "comms")
+					sabotage(player, "Comms")
 				# Else if the 1st argument is "o2".
-				else if argument 1 is "o2":
+				else if argument 1 is "O2":
 					# Use the sabotage function with the argument as "o2".
-					sabotage(player, "o2")
+					sabotage(player, "O2")
 				# Else if the 1st argument is not set.
 				else if argument 1 is not set:
 					# Open chest with 3 rows and named "Sabotage" in dark red.
-					open chest with 3 rows named "&4&lSabotage" to player
-					# Wait 3 ticks to avoid not opening.
-					wait 3 ticks
+					open chest inventory with 3 rows named "&4&lSabotage" to player
 					# Format the 11th slot with a redstone lamp named "Lights" in light red to sabotage lights.
-					format slot 11 of player with redstone lamp named "&cLights" to close then run [make player execute command "/sabotage lights"]
+					set slot 11 of player's current inventory to redstone lamp named "&cLights" with lore "&eTurn off all of the lights."
 					# Format the 13th slot with a nametag named "Comms" in light blue to sabotage comms.
-					format slot 13 of player with nametag named "&9Comms" to close then run [make player execute command "/sabotage comms"]
+					set slot 13 of player's current inventory to nametag named "&9Comms" with lore "&eBlocks security cameras."
 					# Format the 15th slot with a water bottle named "O2" in gold to sabotage O2.
-					format slot 15 of player with water bottle named "&6O2" to close then run [make player execute command "/sabotage o2"]
+					set slot 15 of player's current inventory to water bottle named "&bO2" with lore "&eRemove the crewmate's oxygen."
+
+
+
+command /imc [<text>] [<text>]:
+	trigger:
+		if argument 1 is not set:
+			if player has permission "ImpostersMC.IMC":
+				send "&cImpostersMC &emade by &6Creaous"
+				send "&eRunning version: &6v%{OPTIONS::DONOTEDIT::Version}%"
+			else:
+				send "&cSorry, but you don't have the permission to run this command!"
+
+		else if argument 1 is "start":
+			if player has permission "ImpostersMC.Commands.IMC.Start":
+				# Use the start game function with the player as the argument.
+				startGame(player)
+			else:
+				send "&cSorry, but you don't have the permission to run this command!"
+
+		else if argument 1 is "end":
+			if player has permission "ImpostersMC.Commands.IMC.End":
+				# Use the end game function with the player as the argument.
+				endGame(player)
+			else:
+				send "&cSorry, but you don't have the permission to run this command!"
+
+		else if argument 1 is "host":
+			if player has permission "ImpostersMC.HostGame":
+				hostGame(player)
+			else:
+				send "&cSorry, but you don't have the permission to run this command!"
+
+		else if argument 1 is "gamesettings":
+			if player has permission "ImpostersMC.GameSettings":
+				openGameSettings(player)
+			else:
+				send "&cSorry, but you don't have the permission to run this command!"
+
+		else if argument 1 is "wiki":
+			if player has permission "ImpostersMC.Commands.IMC.Wiki":
+				send "&eThe wiki is located here: &6&o&l&n<link:https://github.com/Creaous/ImpostersMC-Skript/wiki>click here<reset>"
+			else:
+				send "&cSorry, but you don't have the permission to run this command!"
+
+		else if argument 1 is "help":
+			if argument 2 is not set:
+				if player has permission "ImpostersMC.Commands.IMC.Help.Commands":
+					make player execute command "/imc help commands"
+				else:
+					send "&cSorry, but you don't have the permission to run this command!"
+				send "&f"
+				if player has permission "ImpostersMC.Commands.IMC.Help.Permissions":
+					make player execute command "/imc help permissions"
+				else:
+					send "&cSorry, but you don't have the permission to run this command!"
+
+			else if argument 2 is "commands":
+				if player has permission "ImpostersMC.Commands.IMC.Help.Commands":
+					send "&9Commands Help:"
+					send "&6/build &8- &7Allows the player to build."
+					send "&6/whoami &8- &7Shows all information about the player."
+					send "&6/whoami mini &8- &7Shows tasks that the player has."
+					send "&6/imc &8- &7Shows the current version and who the script is by."
+					send "&6/imc host &8- &7Hosts the game."
+					send "&6/imc gamesettings &8- &7Changes game settings."
+					send "&6/imc start &8- &7Starts the game."
+					send "&6/imc end &8- &7Ends the game."
+					send "&6/imc wiki &8- &7Gives you a clickable link to the wiki."
+					send "&6/imc help &8- &7Gives you a help menu that contains both commands and permissions."
+					send "&6/imc help commands &8- &7Gives you a help menu that contains commands."
+					send "&6/imc help permissions &8- &7Gives you a help menu that contains permissions."
+				else:
+					send "&cSorry, but you don't have the permission to run this command!"
+
+			else if argument 2 is "permissions":
+				if player has permission "ImpostersMC.Commands.IMC.Help.Permissions":
+					send "&9Permissions Help:"
+					send "&6ImpostersMC.Build &8- &7Used by: /build"
+					send "&6ImpostersMC.Commands.IMC &8- &7Used by: /imc"
+					send "&6ImpostersMC.Commands.IMC.Help.Commands &8- &7Used by: /imc help commands & /imc help"
+					send "&6ImpostersMC.Commands.IMC.Help.Permissions &8- &7Used by: /imc help permissions & /imc help"
+					send "&6ImpostersMC.Commands.IMC.Start &8- &7Used by: /imc start"
+					send "&6ImpostersMC.Commands.IMC.End &8- &7Used by: /imc end"
+					send "&6ImpostersMC.Commands.IMC.Wiki &8- &7Used by: /imc wiki"
+				else:
+					send "&cSorry, but you don't have the permission to run this command!"
 
 
 
@@ -169,6 +208,10 @@ command /whoami [<text>]:
 		if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 			# If the 1st argument isn't set.
 			if argument 1 is not set:
+				send "%{ImpostersMC::Game::Imposters::*}%"
+				send "%{ImpostersMC::Game::Crewmates::*}%"
+				send ""
+				send "%{ImpostersMC::EmergencyMeeting::Time}% to %{OPTIONS::Default::MeetingCooldown}%"
 				# Say the players name.
 				send "&6%player's name%"
 				# Say what job the player has ("imposter" or "cremwate").
@@ -189,9 +232,15 @@ command /whoami [<text>]:
 
 # EVENTS:
 
+on hunger meter change:
+	if player's world is "%{OPTIONS::General::World}%":
+		set the player's food level to 200
+
+
+
 on join:
 	# If the player is in the "impostersmc" world.
-	if player's world is "{@World}":
+	if player's world is "%{OPTIONS::General::World}%":
 		# If the player's job is "crewmate".
 		if {ImpostersMC::Game::Info::Job::%player%} is "crewmate":
 			# Remove the player from the crewmates team.
@@ -209,7 +258,7 @@ on join:
 
 on quit:
 	# If the player is in the "impostersmc" world.
-	if player's world is "{@World}":
+	if player's world is "%{OPTIONS::General::World}%":
 		# If the player's job is "crewmate".
 		if {ImpostersMC::Game::Info::Job::%player%} is "crewmate":
 			# Remove the player from the crewmates team.
@@ -223,69 +272,194 @@ on quit:
 			# Set the player's gamemode to spectator mode.
 			set player's gamemode to spectator
 
+command /givealltasks:
+	trigger:
+		set {_p} to player
+		add "Lower Engine" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Upper Engine" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Cafeteria: Empty" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Cafeteria: Upload" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Weapons: Clear" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Weapons: Upload" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Weapons: Divert" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "O2: Empty Chute" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "O2: Upload" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "O2: Clean filter" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Nav: Chart" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Nav: Upload" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Nav: Divert" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Nav: Stabilize" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Shields: Divert" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Shields: Prime" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Comms: Divert" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Comms: Upload" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Storage: Fuel" to {ImpostersMC::Game::Tasks::*}
+		add "Admin: Swipe Card" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Electric: Calibrate" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Electric: Fix" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Electric: Upload" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Reactor: Start" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Reactor: Unlock" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Security: Divert" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+		add "Medbay: Scan" to {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
 
-
-every 30 seconds:
-	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
-		# If the game has started:
-		if {ImpostersMC::Game::Started} is true:
-			# Loop all players.
-			loop all players:
-				# If loop player is in the world.
-				if loop-player's world is "{@World}":
-					# If the players job is "crewmate".
-					if {ImpostersMC::Game::Info::Job::%loop-player%} is "crewmate":
-						# Make the player execute the whoami (mini) command.
-						make loop-player execute command "/whoami mini"
 
 
 
 on chat:
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		# If the player is in the correct world.
-		if player's world is "{@World}":
+		if player's world is "%{OPTIONS::General::World}%":
 			# If the game's allowed to talk is true.
 			if {ImpostersMC::Game::AllowedToTalk} is true:
-				# Loop all players.
-				loop all players:
-					# If the loop-player is in the correct world.
-					if loop-player's world is "{@World}":
-						# If the message is the loop-player.
-						if message is "%loop-player%":
-							# If the difference between the vote timer and now is less than 10 seconds.
-							if difference between {ImpostersMC::Game::VoteTimer} and now is less than {@VoteTimer} seconds:
-								# If the player's voted isn't set.
-								if {ImpostersMC::Game::Voted::%player's uuid%} is not set:
-									# Cancel the event.
-									cancel event
-									# Set the player's voted to now.
-									set {ImpostersMC::Game::Voted::%player's uuid%} to now
-									# Add 1 to the arg-player's vote list.
-									add 1 to {ImpostersMC::Game::VoteList::%message%}
-									# Say that your vote has been counted.
-									send "&aYour vote towards &6%message% &ahas been counted!"
-									broadcast "&6%player% &evoted!" in world("{@World}")
-								else:
-									# Say you have already voted.
-									send "&cYou have already voted."
+				if {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} is "Imposters":
+					cancel event
+					
+					send "&aChanged Amount of Imposters."
+					set {ImpostersMC::Game::Settings::Imposters} to message
 
-						else if message is "skip":
-							# If the difference between the vote timer and now is less than 10 seconds.
-							if difference between {ImpostersMC::Game::VoteTimer} and now is less than {@VoteTimer} seconds:
-								# If the player's voted isn't set.
-								if {ImpostersMC::Game::Voted::%player's uuid%} is not set:
-									# Cancel the event.
-									cancel event
-									# Set the player's voted to now.
-									set {ImpostersMC::Game::Voted::%player's uuid%} to now
-									# Add 1 to the arg-player's vote list.
-									add 1 to {ImpostersMC::Game::VoteList::%message%}
-									# Say that your vote has been counted.
-									send "&aYou have skipped voting!"
-									broadcast "&6%player% &evoted!" in world("{@World}")
-								else:
-									# Say you have already voted.
-									send "&cYou have already voted."
+					delete {ImpostersMC::Game::TEMP::%player%::GameSettingsChat}
+
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							gameUpdateBoard(loop-player)
+
+				else if {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} is "ConfirmEjects":
+					cancel event
+					
+					send "&aChanged Confirm Ejects."
+					set {ImpostersMC::Game::Settings::ConfirmEjects} to message
+
+					delete {ImpostersMC::Game::TEMP::%player%::GameSettingsChat}
+
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							gameUpdateBoard(loop-player)
+							
+				else if {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} is "NumberOfMeetings":
+					cancel event
+					
+					send "&aChanged Amount of Meetings."
+					set {ImpostersMC::Game::Settings::NumberOfMeetings} to message
+
+					delete {ImpostersMC::Game::TEMP::%player%::GameSettingsChat}
+
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							gameUpdateBoard(loop-player)
+							
+				else if {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} is "MeetingCooldown":
+					cancel event
+					
+					send "&aChanged Meeting Cooldown."
+					set {ImpostersMC::Game::Settings::MeetingCooldown} to message
+
+					delete {ImpostersMC::Game::TEMP::%player%::GameSettingsChat}
+
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							gameUpdateBoard(loop-player)
+							
+				else if {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} is "PlayerSpeed":
+					cancel event
+					
+					send "&aChanged Player Speed."
+					set {ImpostersMC::Game::Settings::PlayerSpeed} to message
+
+					delete {ImpostersMC::Game::TEMP::%player%::GameSettingsChat}
+
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							gameUpdateBoard(loop-player)
+							
+				else if {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} is "DiscussionTime":
+					cancel event
+					
+					send "&aChanged Discussion Time."
+					set {ImpostersMC::Game::Settings::DiscussionTime} to message
+
+					delete {ImpostersMC::Game::TEMP::%player%::GameSettingsChat}
+
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							gameUpdateBoard(loop-player)
+							
+				else if {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} is "VotingTime":
+					cancel event
+					
+					send "&aChanged Voting Time."
+					set {ImpostersMC::Game::Settings::VotingTime} to message
+
+					delete {ImpostersMC::Game::TEMP::%player%::GameSettingsChat}
+
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							gameUpdateBoard(loop-player)
+							
+				else if {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} is "KillCooldown":
+					cancel event
+
+					send "&aChanged Kill Cooldown."
+					set {ImpostersMC::Game::Settings::KillCooldown} to message
+
+					delete {ImpostersMC::Game::TEMP::%player%::GameSettingsChat}
+
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							gameUpdateBoard(loop-player)
+							
+				else:
+					if {ImpostersMC::Dead::%player%} is true:
+						cancel event
+						send "&cYou can't speak when your dead."
+					else:
+						# Loop all players.
+						loop all players:
+							# If the loop-player is in the correct world.
+							if loop-player's world is "%{OPTIONS::General::World}%":
+								# If the message is the loop-player.
+								if message is loop-player:
+									# If the difference between the vote timer and now is less than 10 seconds.
+									if difference between {ImpostersMC::Game::VoteTimer} and now is less than "%{ImpostersMC::Game::Settings::VotingTime}% seconds" parsed as timespan:
+										if {ImpostersMC::Dead::%loop-player%} is true:
+											cancel event
+											send "&cThe person you are trying to vote for is dead!"
+										# If the player's voted isn't set.
+										else if {ImpostersMC::Game::Voted::%player%} is not set:
+											# Cancel the event.
+											cancel event
+											# Set the player's voted to now.
+											set {ImpostersMC::Game::Voted::%player%} to now
+											# Add 1 to the arg-player's vote list.
+											add 1 to {ImpostersMC::Game::VoteList::%message%}
+											# Say that your vote has been counted.
+											send "&aYour vote towards &6%message% &ahas been counted!"
+											broadcast "&6%player% &evoted!" in world("%{OPTIONS::General::World}%")
+										else:
+											cancel event
+											# Say you have already voted.
+											send "&cYou have already voted."
+
+									else if message is "skip":
+										if {ImpostersMC::Dead::%player%} is true:
+											send "&cYou are dead, you can't vote!"
+										else:
+											# If the difference between the vote timer and now is less than 10 seconds.
+											if difference between {ImpostersMC::Game::VoteTimer} and now is less than "%{OPTIONS::Timers::VoteTimer}% seconds" parsed as timespan:
+												# If the player's voted isn't set.
+												if {ImpostersMC::Game::Voted::%player%} is not set:
+													# Cancel the event.
+													cancel event
+													# Set the player's voted to now.
+													set {ImpostersMC::Game::Voted::%player%} to now
+													# Add 1 to the arg-player's vote list.
+													add 1 to {ImpostersMC::Game::VoteList::%message%}
+													# Say that your vote has been counted.
+													send "&aYou have skipped voting!"
+													broadcast "&6%player% &evoted!" in world("%{OPTIONS::General::World}%")
+												else:
+													# Say you have already voted.
+													send "&cYou have already voted."
 			else:
 				# Cancel the event.
 				cancel event
@@ -294,10 +468,16 @@ on chat:
 
 
 
+on left-click:
+	if player's world is "%{OPTIONS::General::World}%":
+		if {ImpostersMC::Game::Info::Job::%player%} is "imposter":
+			make player execute command "/sabotage"
+
+
 on right-click:
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		# If the player is in the correct world.
-		if player's world is "{@World}":
+		if player's world is "%{OPTIONS::General::World}%":
 			# If the block is a iron trapdoor.
 			if block is iron trapdoor:
 				# If the player's job is "imposter".
@@ -318,7 +498,7 @@ on right-click:
 on sneak toggle:
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		# if the player is in the correct world.
-		if player's world is "{@World}":
+		if player's world is "%{OPTIONS::General::World}%":
 			# If the player is sneaking.
 			if player is sneaking:
 				# If the block under the player is an iron trapdoor.
@@ -354,9 +534,9 @@ on sign change:
 
 on damage:
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
-		if attacker's world is "{@World}":
+		if attacker's world is "%{OPTIONS::General::World}%":
 			# If the difference between the vote timer and now is less than 10 seconds.
-			if difference between {ImpostersMC::Game::VoteTimer} and now is more than {@VoteTimer} seconds:
+			if difference between {ImpostersMC::Game::VoteTimer} and now is more than "%{OPTIONS::Timers::VoteTimer}% seconds" parsed as timespan:
 				# Cancel the event.
 				cancel event
 				# Send you are not an imposter to the attacker.
@@ -368,7 +548,7 @@ on damage:
 					# Set the Kill Cooldown Cooldown to true.
 					set {ImpostersMC::Game::KillCooldown::%attacker%::OnCooldown} to true
 					# Set the Kill Cooldown Time to the KillCooldown variable.
-					set {ImpostersMC::Game::KillCooldown::%attacker%::Time} to {@KillCooldown}
+					set {ImpostersMC::Game::KillCooldown::%attacker%::Time} to {ImpostersMC::Game::Settings::KillCooldown}
 				else:
 					# Cancel the event.
 					cancel event
@@ -380,16 +560,23 @@ on damage:
 on death of player:
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		# If the player's world is the correct world.
-		if player's world is "{@World}":
+		if player's world is "%{OPTIONS::General::World}%":
 			# Set the player's death message to nothing.
 			set death message to ""
+			set {ImpostersMC::Dead::%player%} to true
+
+			if {ImpostersMC::Game::Info::Job::%player%} is "crewmate":
+				remove player from {ImpostersMC::Game::Crewmates::*}
+
+			if {ImpostersMC::Game::Info::Job::%player%} is "imposter":
+				remove player from {ImpostersMC::Game::Imposters::*}
 
 
 
 on right-click:
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		# If the player's world is the correct world.
-		if player's world is "{@World}":
+		if player's world is "%{OPTIONS::General::World}%":
 			# If the block is a sign.
 			if block is sign:
 
@@ -566,7 +753,7 @@ on right-click:
 				if line 1 is "&c[ImpostersMC]":
 					if line 2 is "&a[Task]":
 						if line 3 is "&eFix Lights":
-							if block at location(109, 38, 352, "{@World}" parsed as world) is air:
+							if block at location(109, 38, 352, "%{OPTIONS::General::World}%" parsed as world) is air:
 								DoTask(player, "S: Fix Lights")
 							else:
 								send "&cLights aren't out yet."
@@ -576,7 +763,7 @@ on right-click:
 				if line 1 is "&c[ImpostersMC]":
 					if line 2 is "&a[Task]":
 						if line 3 is "&eFix Comms":
-							if block at location(149, 34, 376, "{@World}" parsed as world) is iron block:
+							if block at location(149, 34, 376, "%{OPTIONS::General::World}%" parsed as world) is iron block:
 								DoTask(player, "S: Comms")
 							else:
 								send "&cComms aren't out yet."
@@ -603,10 +790,42 @@ on right-click:
 
 
 
+on place:
+	if {OPTIONS::General::EnableBuildMode} is true:
+		if player's world is "%{OPTIONS::General::World}%":
+			if player has permission "ImpostersMC.Build":
+				if {ImpostersMC::BuildMode::Enabled::%player%} is false:
+					cancel event
+					send "&c&l(!) &6Build mode isn't enabled. Please enable it by running &e/build&6."
+			else:
+				cancel event
+				send "&c&l(!) &6You are not allowed to build here!"
+
+
+
+on break:
+	if {OPTIONS::General::EnableBuildMode} is true:
+		if player's world is "%{OPTIONS::General::World}%":
+			if player has permission "ImpostersMC.Build":
+				if {ImpostersMC::BuildMode::Enabled::%player%} is false:
+					cancel event
+					send "&c&l(!) &6Build mode isn't enabled. Please enable it by running &e/build&6."
+			else:
+				cancel event
+				send "&c&l(!) &6You are not allowed to break here!"
+
+
+
+on join:
+	if player has permission "ImpostersMC.Build":
+		set {ImpostersMC::BuildMode::Enabled::%player%} to false
+
+
+
 on death of player:
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		# If the player's in the correct world.
-		if player's world is "{@World}":
+		if player's world is "%{OPTIONS::General::World}%":
 			# Set the block at the victim's location to a OAK sign.
 			set block at victim's location to oak sign
 			# Set the first line to [ImpostersMC] in red text.
@@ -617,7 +836,7 @@ on death of player:
 			set 3rd line of block at victim to "&e%victim%"
 
 			# Set the {_players::*} to every player in the world.
-			set {_players::*} to all players in world("{@World}")
+			set {_players::*} to all players in world("%{OPTIONS::General::World}%")
 			# Set {_playerscount} to the size of the {_players::*} variable.
 			set {_playerscount} to size of {_players::*}
 
@@ -641,7 +860,7 @@ on death of player:
 			# Set the player's gamemode to spectator.
 			set player's gamemode to spectator
 			# Teleport the player to the emergency meeting table location in the world.
-			teleport the player to location(110, 34, 288, "{@World}" parsed as world)
+			teleport the player to location(110, 34, 288, "%{OPTIONS::General::World}%" parsed as world)
 			# Say that they died in red text.
 			send "&c&lYou died!"
 
@@ -652,13 +871,13 @@ every 1 second:
 		# If the Emergency Meeting Cooldown is true.
 		if {ImpostersMC::EmergencyMeeting::OnCooldown} is true:
 			# If the Emergency Meeting Time is 0.
-			if {ImpostersMC::EmergencyMeeting::Time} is 0:
+			if {ImpostersMC::EmergencyMeeting::Time} is less than 0:
 				# Delete the Emergency Meeting Time.
 				delete {ImpostersMC::EmergencyMeeting::Time}
 				# Set the Emergency Meeting Cooldown to false.
 				set {ImpostersMC::EmergencyMeeting::OnCooldown} to false
 				# Set the allowed to talk variable to false.
-				set {ImpostersMC::Game::AllowedToTalk} to false
+				set {ImpostersMC::Game::AllowedToTalk} to true
 			else:
 				# Remove 1 from the Emergency Meeting Time.
 				remove 1 from {ImpostersMC::EmergencyMeeting::Time}
@@ -713,7 +932,7 @@ every 1 second:
 				remove 1 from {ImpostersMC::SabotageCooldown_Comms::Time}
 
 		# If the difference between the vote timer and now is less than 10 seconds.
-		if difference between {ImpostersMC::Game::VoteTimer} and now is more than {@VoteTimer} seconds:	
+		if difference between {ImpostersMC::Game::VoteTimer} and now is more than "%{ImpostersMC::Game::Settings::VotingTime}% seconds" parsed as timespan:	
 			# Clear the vote timer.
 			clear {ImpostersMC::Game::VoteTimer}
 			# Delete everyone's voted.
@@ -725,7 +944,7 @@ every 1 second:
 			# If {_top} isn't set .
 			if {_top} is not set:
 				# Broadcast that none voted in the right world.
-				broadcast "&eNone voted!" in world("{@World}")
+				broadcast "&eNone voted!" in world("%{OPTIONS::General::World}%")
 				# Do nothing else.
 				stop
 			# Loop the vote list.
@@ -735,13 +954,13 @@ every 1 second:
 				# If {_p} is set.
 				if {_p} is set:
 					# Broadcast that there was a tie in the right world.
-					broadcast "&eTie!" in world("{@World}")
+					broadcast "&eTie!" in world("%{OPTIONS::General::World}%")
 					# Do nothing else
 					stop
 				# Set {_p} to the loop-index.
 				set {_p} to loop-index
 			# Broadcast that the {_p} is getting ejected and had {_top} votes in the right world.
-			broadcast "&eEjecting &6%{_p}%&e, they had &6%{_top}% &evotes!" in world("{@World}")
+			broadcast "&eEjecting &6%{_p}%&e, they had &6%{_top}% &evotes!" in world("%{OPTIONS::General::World}%")
 			# Eject the player using the function.
 			ejectPlayer({_p} parsed as player) # IMPLEMENT LATER
 
@@ -749,21 +968,21 @@ every 1 second:
 		delete {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
 		# All of the seats location for emergency meetings (& reporting bodies).
-		add location(120, 34, 388, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-		add location(120, 34, 389, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-		add location(120, 34, 387, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(120, 34, 388, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(120, 34, 389, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(120, 34, 387, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
-		add location(119, 34, 391, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-		add location(118, 34, 391, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-		add location(117, 34, 391, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(119, 34, 391, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(118, 34, 391, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(117, 34, 391, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
-		add location(116, 34, 389, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-		add location(116, 34, 388, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-		add location(116, 34, 387, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(116, 34, 389, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(116, 34, 388, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(116, 34, 387, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
-		add location(117, 34, 386, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-		add location(118, 34, 386, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-		add location(119, 34, 386, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(117, 34, 386, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(118, 34, 386, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+		add location(119, 34, 386, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
 # !!! I STOPPED COMMENTING HERE !!!
 # !!! I STOPPED COMMENTING HERE !!!
@@ -773,35 +992,65 @@ every 1 second:
 
 every 2 seconds:
 	if {ImpostersMC::Game::Started} is true:
-		set {_players::*} to all players in world("{@World}")
+		set {_players::*} to all players in world("%{OPTIONS::General::World}%")
 		set {_playerscount} to size of {_players::*}
 
-		if {_playerscount} is less than 1: # !!! CHANGE TO 3 !!!
+		if {_playerscount} is less than 3: # !!! CHANGE TO 3 !!!
 
 			set {ImpostersMC::Game::Started} to false
 			winGame("imposters")
 
 		if size of {ImpostersMC::Game::Imposters::*} is less than 1:
+
+			set {ImpostersMC::Game::Started} to false
 			winGame("crewmates")
 
-		if size of {ImpostersMC::Game::Crewmates::*} is less than 1: # !!! CHANGE TO 2 !!!
+		if {ImpostersMC::Game::Imposters::*} is not set:
 
+			set {ImpostersMC::Game::Started} to false
+			winGame("crewmates")
+
+		if size of {ImpostersMC::Game::Crewmates::*} is less than 2: # !!! CHANGE TO 2 !!!
+
+			set {ImpostersMC::Game::Started} to false
 			winGame("imposters")
+
+		if {ImpostersMC::Game::Crewmates::*} is not set:
+
+			set {ImpostersMC::Game::Started} to false
+			winGame("imposters")
+
+		loop all players:
+			if loop-player's world is "%{OPTIONS::General::World}%":
+				set the loop-player's walk speed to {ImpostersMC::Game::Settings::PlayerSpeed}
 
 
 
 on script load:
 	set {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} to false
 	send "&8--------------------------------------------------------------" to console
-	send "&c&lImpostersMC &eby &6Creaous_ &erunning &6{@Version} &e:)" to console
+	send "&c&lImpostersMC &eby &6Creaous_ &erunning &6%{OPTIONS::DONOTEDIT::Version}% &e:)" to console
 	send "&8--------------------------------------------------------------" to console
-	set {_new} to text from "https://raw.githubusercontent.com/Creaous/ImpostersMC-Skript/main/VERSION"
-	if "{@Version}" isn't {_new}:
-		send "&eA newer version of &c&lImpostersMC &eis available (&6%{_new}%&e)!" to console
+
+	send a "GET" request to "https://raw.githubusercontent.com/Creaous/ImpostersMC-Skript/main/VERSION"
+	set {_t} to last http response
+	set {_j} to {_t}'s body
+	set {_v::*} to {_j} split at "|"
+
+	if "%{OPTIONS::DONOTEDIT::Version}%" is not equal to "%{_v::2}%":
+		send "&eA newer version of &c&lImpostersMC &eis available! &6%{_v::2}%" to console
+		if {OPTIONS::General::AutoUpdate} is true:
+			if file path "plugins/Skript/scripts/ImpostersMC.sk" is not missing:
+				download file from url "https://github.com/Creaous/ImpostersMC-Skript/releases/latest/download/ImpostersMC.sk" to file path "plugins/Skript/scripts/ImpostersMC.sk":
+					execute console command "/sk reload ImpostersMC.sk"
+			else if file path "plugins/Skript/scripts/EzDownloads/ImpostersMC.sk" is not missing:
+				download file from url "https://github.com/Creaous/ImpostersMC-Skript/releases/latest/download/ImpostersMC.sk" to file path "plugins/Skript/scripts/EzDownloads/ImpostersMC.sk":
+					execute console command "/sk reload EzDownloads/ImpostersMC.sk"
 	else:
 		send "&aYou are running the latest version of &c&lImpostersMC&a!" to console
-	resetEverything()
 
+	resetEverything()
+	initalizeYAML()
 
 
 on inventory click:
@@ -809,6 +1058,40 @@ on inventory click:
 		if clicked slot is 13:
 			close player's inventory
 			finishTask(player, "Storage: Fuel")
+
+	if inventory name of player's current inventory is "&6&lGame Settings":
+		if clicked slot is 0:
+			close player's inventory
+			send "&ePlease type a number in the chat to change the &cImposters&e."
+			set {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} to "Imposters"
+		else if clicked slot is 1:
+			close player's inventory
+			send "&ePlease type true or false in the chat to change &aConfirm Ejects&e."
+			set {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} to "ConfirmEjects"
+		else if clicked slot is 2:
+			close player's inventory
+			send "&ePlease type a number in the chat to change the &eNumber of Meetings&e."
+			set {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} to "NumberOfMeetings"
+		else if clicked slot is 3:
+			close player's inventory
+			send "&ePlease type a number in the chat to change the &aMeeting Cooldown&e."
+			set {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} to "MeetingCooldown"
+		else if clicked slot is 4:
+			close player's inventory
+			send "&ePlease type a number in the chat to change &aPlayer Speed&e."
+			set {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} to "PlayerSpeed"
+		else if clicked slot is 5:
+			close player's inventory
+			send "&ePlease type a number in the chat to change the &eDiscussion Time&e."
+			set {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} to "DiscussionTime"
+		else if clicked slot is 6:
+			close player's inventory
+			send "&ePlease type a number in the chat to change &aVoting Time&e."
+			set {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} to "VotingTime"
+		else if clicked slot is 7:
+			close player's inventory
+			send "&ePlease type a number in the chat to change the &eKill Cooldown&e."
+			set {ImpostersMC::Game::TEMP::%player%::GameSettingsChat} to "KillCooldown"
 
 	if inventory name of player's current inventory is "&0Chart Course":
 		cancel event
@@ -885,18 +1168,162 @@ on inventory click:
 				set slot 35 of player's current inventory to blue stained glass pane named "&aConnected" with lore "&eConnected to wire!"
 				send "&b&lConnected blue wire!"
 
-
+	if inventory name of player's current inventory is "&4&lSabotage":
+		cancel event
+		if name of clicked slot is "&cLights":
+			make player execute command "/sabotage lights"
+			close player's inventory
+		else if name of clicked slot is "&9Comms":
+			make player execute command "/sabotage comms"
+			close player's inventory
+		else if name of clicked slot is "&bO2":
+			make player execute command "/sabotage o2"
+			close player's inventory
 
 # FUNCTIONS:
 
+function initalizeYAML():
+	set {_config} to "plugins/ImpostersMC/config.yml"
+	load yaml {_config} as {_config}
+	skript-yaml {_config} is empty:
+		set the header of {_config} to "------------+[ImpostersMC]+------------"
+		set skript-yaml value "General.World" from {_config} to "world"
+		set skript-yaml value "General.AutoUpdate" from {_config} to false
+		set skript-yaml value "General.EnableBuildMode" from {_config} to true
+
+		set skript-yaml value "Cooldown.Sabotage_Lights" from {_config} to 30
+		set skript-yaml value "Cooldown.Sabotage_O2" from {_config} to 30
+		set skript-yaml value "Cooldown.Sabotage_Comms" from {_config} to 30
+
+		set skript-yaml value "Default.Imposters" from {_config} to 2
+		set skript-yaml value "Default.ConfirmEjects" from {_config} to false
+		set skript-yaml value "Default.NumberOfMeetings" from {_config} to 2
+		set skript-yaml value "Default.MeetingCooldown" from {_config} to 20 # DONE
+		set skript-yaml value "Default.PlayerSpeed" from {_config} to 1
+		set skript-yaml value "Default.DiscussionTime" from {_config} to 30 # DONE
+		set skript-yaml value "Default.VotingTime" from {_config} to 60 # DONE
+		set skript-yaml value "Default.KillCooldown" from {_config} to 30 # DONE
+
+		save yaml {_config}
+
+	set {OPTIONS::General::World} to skript-yaml value "General.World" of {_config}
+	set {OPTIONS::General::AutoUpdate} to skript-yaml value "General.AutoUpdate" of {_config}
+	set {OPTIONS::General::EnableBuildMode} to skript-yaml value "General.EnableBuildMode" of {_config}
+
+	set {OPTIONS::Cooldown::Sabotages::Lights} to skript-yaml value "Cooldown.Sabotage_Lights" of {_config}
+	set {OPTIONS::Cooldown::Sabotages::O2} to skript-yaml value "Cooldown.Sabotage_O2" of {_config}
+	set {OPTIONS::Cooldown::Sabotages::Comms} to skript-yaml value "Cooldown.Sabotage_Comms" of {_config}
+
+	set {OPTIONS::Cooldown::Others::EmergencyMeeting} to skript-yaml value "Default.MeetingCooldown" of {_config}
+	set {OPTIONS::Cooldown::Others::Killing} to skript-yaml value "Default.KillCooldown" of {_config}
+	set {OPTIONS::Timers::EmergencyMeeting} to skript-yaml value "Default.DiscussionTime" of {_config}
+	set {OPTIONS::Timers::VoteTimer} to skript-yaml value "Default.VotingTime" of {_config}
+
+	set {OPTIONS::Default::Imposters} to skript-yaml value "Default.Imposters" of {_config}
+	set {OPTIONS::Default::ConfirmEjects} to skript-yaml value "Default.ConfirmEjects" of {_config}
+	set {OPTIONS::Default::NumberOfMeetings} to skript-yaml value "Default.NumberOfMeetings" of {_config}
+	set {OPTIONS::Default::MeetingCooldown} to skript-yaml value "Default.MeetingCooldown" of {_config}
+	set {OPTIONS::Default::PlayerSpeed} to skript-yaml value "Default.PlayerSpeed" of {_config}
+	set {OPTIONS::Default::DiscussionTime} to skript-yaml value "Default.DiscussionTime" of {_config}
+	set {OPTIONS::Default::VotingTime} to skript-yaml value "Default.VotingTime" of {_config}
+	set {OPTIONS::Default::KillCooldown} to skript-yaml value "Default.KillCooldown" of {_config}
+
+	set {OPTIONS::DONOTEDIT::Version} to "{@Version}"
+	set {OPTIONS::DONOTEDIT::Type} to "{@Type}"
+
+
+
+function getTasks(p: player):
+	set {ImpostersMC::Game::Info::Tasks::1st::%{_p}%} to 1st element out of {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+	set {ImpostersMC::Game::Info::Tasks::2st::%{_p}%} to 2st element out of {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+	set {ImpostersMC::Game::Info::Tasks::3st::%{_p}%} to 3st element out of {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+	set {ImpostersMC::Game::Info::Tasks::4st::%{_p}%} to 4st element out of {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
+
+
+
+function updateBoard(p: player):
+	clear {_p}'s scoreboard
+	set title of {_p}'s scoreboard to "&b&lImpostersMC"
+	if {ImpostersMC::Game::Info::Job::%{_p}%} is "imposter":
+		set {_job} to "&c&lImposter"
+	else if {ImpostersMC::Game::Info::Job::%{_p}%} is "crewmate":
+		set {_job} to "&a&lCrewmate"
+	if {ImpostersMC::Game::Info::Job::%{_p}%} is "crewmate":
+		if {ImpostersMC::Game::Info::Tasks::%{_p}%::*} contains {ImpostersMC::Game::Info::Tasks::4st::%{_p}%}:
+			set {_4_} to "&c→ %{ImpostersMC::Game::Info::Tasks::4st::%{_p}%}%"
+		else:
+			set {_4_} to "&a✔ %{ImpostersMC::Game::Info::Tasks::4st::%{_p}%}%"
+
+		if {ImpostersMC::Game::Info::Tasks::%{_p}%::*} contains {ImpostersMC::Game::Info::Tasks::3st::%{_p}%}:
+			set {_3_} to "&c→ %{ImpostersMC::Game::Info::Tasks::3st::%{_p}%}%"
+		else:
+			set {_3_} to "&a✔ %{ImpostersMC::Game::Info::Tasks::3st::%{_p}%}%"
+
+		if {ImpostersMC::Game::Info::Tasks::%{_p}%::*} contains {ImpostersMC::Game::Info::Tasks::2st::%{_p}%}:
+			set {_2_} to "&c→ %{ImpostersMC::Game::Info::Tasks::2st::%{_p}%}%"
+		else:
+			set {_2_} to "&a✔ %{ImpostersMC::Game::Info::Tasks::2st::%{_p}%}%"
+
+		if {ImpostersMC::Game::Info::Tasks::%{_p}%::*} contains {ImpostersMC::Game::Info::Tasks::1st::%{_p}%}:
+			set {_1_} to "&c→ %{ImpostersMC::Game::Info::Tasks::1st::%{_p}%}%"
+		else:
+			set {_1_} to "&a✔ %{ImpostersMC::Game::Info::Tasks::1st::%{_p}%}%"
+
+		set line 6 of {_p}'s scoreboard to "&6&lRole: &e&l%{_job}%"
+		set line 5 of {_p}'s scoreboard to "&6&lTasks:"
+		set line 4 of {_p}'s scoreboard to "%{_4_}%"
+		set line 3 of {_p}'s scoreboard to "%{_3_}%"
+		set line 2 of {_p}'s scoreboard to "%{_2_}%"
+		set line 1 of {_p}'s scoreboard to "%{_1_}%"
+	else:
+		set line 4 of {_p}'s scoreboard to "&6&lRole: &e&l%{_job}%"
+		set line 3 of {_p}'s scoreboard to "&6&lTasks:"
+		set line 2 of {_p}'s scoreboard to "&c→ Kill Everyone"
+		set line 1 of {_p}'s scoreboard to "&c→ Sabotage"
+
+
+
+function gameUpdateBoard(p: player):
+	clear {_p}'s scoreboard
+	set title of {_p}'s scoreboard to "&b&lImpostersMC"
+	set line 9 of {_p}'s scoreboard to "&6&lGame Settings:"
+	set line 8 of {_p}'s scoreboard to "&eImposters: &6%{ImpostersMC::Game::Settings::Imposters}%" # The number of imposters
+	set line 7 of {_p}'s scoreboard to "&eConfirm Ejects: &6%{ImpostersMC::Game::Settings::ConfirmEjects}%"
+	set line 6 of {_p}'s scoreboard to "&eNumber of Meetings: &6%{ImpostersMC::Game::Settings::NumberOfMeetings}%"
+	set line 5 of {_p}'s scoreboard to "&eMeeting Cooldown: &6%{ImpostersMC::Game::Settings::MeetingCooldown}%"
+	set line 4 of {_p}'s scoreboard to "&ePlayer Speed: &6%{ImpostersMC::Game::Settings::PlayerSpeed}%"
+	set line 3 of {_p}'s scoreboard to "&eDiscussion Time: &6%{ImpostersMC::Game::Settings::DiscussionTime}%"
+	set line 2 of {_p}'s scoreboard to "&eVoting Time: &6%{ImpostersMC::Game::Settings::VotingTime}%"
+	set line 1 of {_p}'s scoreboard to "&eKill Cooldown: &6%{ImpostersMC::Game::Settings::KillCooldown}%"
+
+
+
+function openGameSettings(p: player):
+	open chest inventory with 3 rows named "&6&lGame Settings" to {_p}
+	set slot 10 of {_p}'s current inventory to red stained glass pane named "&c&lImposters" with lore "Click me to change the amount of imposters."
+	set slot 11 of {_p}'s current inventory to red stained glass pane named "&c&lConfirm Ejects" with lore "Click me to turn on and off confirm ejects."
+	set slot 12 of {_p}'s current inventory to red stained glass pane named "&c&lNumber of Meetings" with lore "Click me to change the number of meetings."
+	set slot 13 of {_p}'s current inventory to red stained glass pane named "&c&lMeeting Cooldown" with lore "Click me to change the meeting cooldown."
+	set slot 14 of {_p}'s current inventory to red stained glass pane named "&c&lPlayer Speed" with lore "Click me to change the player speed."
+	set slot 15 of {_p}'s current inventory to red stained glass pane named "&c&lDiscussion Time" with lore "Click me to change the discussion time."
+	set slot 16 of {_p}'s current inventory to red stained glass pane named "&c&lVoting Time" with lore "Click me to change the voting time."
+	set slot 22 of {_p}'s current inventory to red stained glass pane named "&c&lKill Cooldown" with lore "Click me to change the kill cooldown."
+
+
+command /reloadboard:
+	trigger:
+		gameUpdateBoard(player)
+
+
+
 function winGame(t: text):
 	if {_t} is "crewmates":
-		broadcast "&aCrewmates win!" in world("{@World}")
+		broadcast "&aCrewmates win!" in world("%{OPTIONS::General::World}%")
 		set gamemode of all players to survival
-		set {_loc} to location(122, 6, 496, "{@World}" parsed as world)
+		set {_loc} to location(122, 6, 496, "%{OPTIONS::General::World}%" parsed as world)
 		set yaw of {_loc} to -269
 		set pitch of {_loc} to 4
-		teleport all players in world("{@World}") to {_loc}
+		teleport all players in world("%{OPTIONS::General::World}%") to {_loc}
 
 		# Run the resetEverything function.
 		resetEverything()
@@ -904,42 +1331,42 @@ function winGame(t: text):
 		# Loop all players.
 		loop all players:
 			# If the loop player is in the world.
-			if loop-player's world is "{@World}":
+			if loop-player's world is "%{OPTIONS::General::World}%":
 				# Set the nametag back to normal.
 				set loop-player's nametag to loop-player's name
 				reveal loop-player from all players
 
 		# Do it again just in case.
-		reveal all players from all players in world("{@World}")
+		reveal all players from all players in world("%{OPTIONS::General::World}%")
 
 		wait 3 second
 
-		reveal all players from all players in world("{@World}")
+		reveal all players from all players in world("%{OPTIONS::General::World}%")
 
 		# Set the game started to true
 		set {ImpostersMC::Game::Started} to false
 	else if {_t} is "imposters":
-		broadcast "&cImposters win!" in world("{@World}")
+		broadcast "&cImposters win!" in world("%{OPTIONS::General::World}%")
 		set gamemode of all players to survival
-		set {_loc} to location(122, 6, 496, "{@World}" parsed as world)
+		set {_loc} to location(122, 6, 496, "%{OPTIONS::General::World}%" parsed as world)
 		set yaw of {_loc} to -269
 		set pitch of {_loc} to 4
-		teleport all players in world("{@World}") to {_loc}
+		teleport all players in world("%{OPTIONS::General::World}%") to {_loc}
 
 		# Loop all players.
 		loop all players:
 			# If the loop player is in the world.
-			if loop-player's world is "{@World}":
+			if loop-player's world is "%{OPTIONS::General::World}%":
 				# Set the nametag back to normal.
 				set loop-player's nametag to loop-player's name
 				reveal loop-player from all players
 
 		# Do it again just in case.
-		reveal all players from all players in world("{@World}")
+		reveal all players from all players in world("%{OPTIONS::General::World}%")
 
 		wait 3 second
 
-		reveal all players from all players in world("{@World}")
+		reveal all players from all players in world("%{OPTIONS::General::World}%")
 
 		# Set the game started to true
 		set {ImpostersMC::Game::Started} to false
@@ -950,32 +1377,45 @@ function winGame(t: text):
 	# Set the game started to true
 	set {ImpostersMC::Game::Started} to false
 
+	loop all players:
+		if loop-player's world is "%{OPTIONS::General::World}%":
+			set the loop-player's walk speed to 0.4
+
 
 
 function ejectPlayer(p: player):
+	loop all players:
+		delete {ImpostersMC::Game::Freezed::%loop-player%}
+
 	send "&eGoodbye!" to {_p}
-	hide all players from all players in world("{@World}")
-	reveal {_p} from all players in world("{@World}")
-	set {_loc} to location(116, 35, 356, "{@World}" parsed as world)
+	hide all players from all players in world("%{OPTIONS::General::World}%")
+	reveal {_p} from all players in world("%{OPTIONS::General::World}%")
+	set {_loc} to location(116, 35, 356, "%{OPTIONS::General::World}%" parsed as world)
 	set yaw of {_loc} to -180
 	set pitch of {_loc} to 1
-	teleport all players in world("{@World}") to {_loc}
+	teleport all players in world("%{OPTIONS::General::World}%") to {_loc}
 
-	set {_loc2} to location(116, 33, 352, "{@World}" parsed as world)
+	set {_loc2} to location(116, 33, 352, "%{OPTIONS::General::World}%" parsed as world)
 	set yaw of {_loc2} to 1
 	set pitch of {_loc2} to 5
 	teleport {_p} to {_loc2}
 
+	loop all players:
+		freezePlayer(loop-player)
+
+	delete {ImpostersMC::Game::Freezed::%{_p}%}
+
 	wait 3 second
-	set block at location(113, 35, 351, "{@World}" parsed as world) to air
+	set block at location(113, 35, 351, "%{OPTIONS::General::World}%" parsed as world) to air
 	wait 2 second
-	set block at location(113, 35, 351, "{@World}" parsed as world) to redstone block
+	set block at location(113, 35, 351, "%{OPTIONS::General::World}%" parsed as world) to redstone block
+	kill {_p}
 	wait 3 second
-	reveal all players from all players in world("{@World}")
+	reveal all players from all players in world("%{OPTIONS::General::World}%")
 
 	loop all players:
 		# Set {_players::*} to all of the players.
-		set {_players::*} to all players in world("{@World}")
+		set {_players::*} to all players in world("%{OPTIONS::General::World}%")
 
 		# Set {_playerscount} to the amount of players.
 		set {_playerscount} to size of {_players::*}
@@ -993,12 +1433,28 @@ function ejectPlayer(p: player):
 			# Teleport the player to the emergency meeting seat.
 			teleport {_var2} to {_var}
 
+		if loop-player's world is "%{OPTIONS::General::World}%":
+			delete {ImpostersMC::Game::Freezed::%loop-player%}
+
 	# Do it again just in case.
-	reveal all players from all players in world("{@World}")
+	reveal all players from all players in world("%{OPTIONS::General::World}%")
 
 	wait 3 second
 
-	reveal all players from all players in world("{@World}")
+	reveal all players from all players in world("%{OPTIONS::General::World}%")
+
+	if {ImpostersMC::Game::Settings::ConfirmEjects} is true:
+		if {_p} is "skip":
+			send "&eSkipped voting." to all players in world("%{OPTIONS::General::World}%")
+		else:
+			if {ImpostersMC::Game::Info::Job::%{_p}%} is "imposter":
+				set {_job} to "&c&l%{ImpostersMC::Game::Info::Job::%{_p}%}%"
+			else:
+				set {_job} to "&a&l%{ImpostersMC::Game::Info::Job::%{_p}%}%"
+
+			send "&6%{_p}% &ewas an %{_job}%&e!" to all players in world("%{OPTIONS::General::World}%")
+	else:
+		send "&6%{_p}% &ewas ejected!" to all players in world("%{OPTIONS::General::World}%")
 
 
 
@@ -1006,76 +1462,81 @@ function callMeeting(p: player, t: text):
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		# If the 2nd argument is "emergencyMeeting".
 		if {_t} is "emergencyMeeting":
-			# If the Emergency Meeting Cooldown is true.
-			if {ImpostersMC::EmergencyMeeting::OnCooldown} is true:
-				# Send a message saying that it is on cooldown and how long it has left.
-				send "&eEmergency meeting is currently on cooldown for &6%{ImpostersMC::EmergencyMeeting::Time}% &esecond(s)." to {_p}
+			if {ImpostersMC::Game::Settings::NumberOfMeetings} is less than 1:
+				send "&cAll the meetings have ran out." to {_p}
 			else:
-				loop all players:
-					if loop-player's world is "{@World}":
-						set {ImpostersMC::Game::Voted::%loop-player%} to false
-						delete {ImpostersMC::Game::Votes::%loop-player%::*}
+				# If the Emergency Meeting Cooldown is true.
+				if {ImpostersMC::EmergencyMeeting::OnCooldown} is true:
+					# Send a message saying that it is on cooldown and how long it has left.
+					send "&eEmergency meeting is currently on cooldown for &6%{ImpostersMC::EmergencyMeeting::Time}% &esecond(s)." to {_p}
+				else:
+					loop all players:
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							delete {ImpostersMC::Game::Voted::%loop-player%}
+							delete {ImpostersMC::Game::Votes::%loop-player%::*}
 
-				# Set the Emergency Meeting Cooldown to true.
-				set {ImpostersMC::EmergencyMeeting::OnCooldown} to true
-				# Set the Emergency Meeting Time to the EmergencyMeetingCooldown variable.
-				set {ImpostersMC::EmergencyMeeting::Time} to {@EmergencyMeetingCooldown}
-				# Broadcast to the entire world that the player called an emergency meeting.
-				broadcast "&6%{_p}% &ehas called an emergency meeting!" in world("{@World}")
-				broadcast "&eTo vote on someone, just type their name in chat or type &cskip &eto skip the vote."
+					# Set the Emergency Meeting Cooldown to true.
+					set {ImpostersMC::EmergencyMeeting::OnCooldown} to true
+					# Set the Emergency Meeting Time to the EmergencyMeetingCooldown variable.
+					set {ImpostersMC::EmergencyMeeting::Time} to {ImpostersMC::Game::Settings::MeetingCooldown}
+					# Broadcast to the entire world that the player called an emergency meeting.
+					broadcast "&6%{_p}% &ehas called an emergency meeting!" in world("%{OPTIONS::General::World}%")
+					broadcast "&eTo vote on someone, just type their name in chat or type &cskip &eto skip the vote." in world("%{OPTIONS::General::World}%")
 
-				# Loop all people on server.
-				loop all players:
-					# If the player is in the ImpostersMC world.
-					if loop-player's world is "{@World}":
-						# Set {_players::*} to all of the players.
-						set {_players::*} to all players in world("{@World}")
+					# Loop all people on server.
+					loop all players:
+						# If the player is in the ImpostersMC world.
+						if loop-player's world is "%{OPTIONS::General::World}%":
+							# Set {_players::*} to all of the players.
+							set {_players::*} to all players in world("%{OPTIONS::General::World}%")
 
-						# Set {_playerscount} to the amount of players.
-						set {_playerscount} to size of {_players::*}
+							# Set {_playerscount} to the amount of players.
+							set {_playerscount} to size of {_players::*}
 
-						# Loop for how many players are on the server.
-						loop {_playerscount} times:
-							# set {_var} to a random emergency meeting seat.
-							set {_var} to random element out of {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-							# Set {_var2} to a random player in the world.
-							set {_var2} to random element out of {_players::*}
-							# Remove {_var} from the emergency meeting seats.
-							remove {_var} from {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-							# Remove {_var2} from the players list.
-							remove {_var2} from {_players::*}
-							# Teleport the player to the emergency meeting seat.
-							teleport {_var2} to {_var}
+							# Loop for how many players are on the server.
+							loop {_playerscount} times:
+								# set {_var} to a random emergency meeting seat.
+								set {_var} to random element out of {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+								# Set {_var2} to a random player in the world.
+								set {_var2} to random element out of {_players::*}
+								# Remove {_var} from the emergency meeting seats.
+								remove {_var} from {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+								# Remove {_var2} from the players list.
+								remove {_var2} from {_players::*}
+								# Teleport the player to the emergency meeting seat.
+								teleport {_var2} to {_var}
 
-				# Set the allowed to talk variable to true.
-				set {ImpostersMC::Game::AllowedToTalk} to true
+							freezePlayer(loop-player)
 
-				set {ImpostersMC::Game::VoteTimer} to now
-				clear {ImpostersMC::Game::Vote::*}
-				clear {ImpostersMC::Game::VoteList::*}
+					# Set the allowed to talk variable to true.
+					set {ImpostersMC::Game::AllowedToTalk} to true
 
-				wait {@EmergencyMeeting} seconds
-				set {ImpostersMC::Game::AllowedToTalk} to false
+					set {ImpostersMC::Game::VoteTimer} to now
+					clear {ImpostersMC::Game::Vote::*}
+					clear {ImpostersMC::Game::VoteList::*}
 
-				# Delete everyone's voted.
-				delete {ImpostersMC::Game::Voted::*}
-							
+					wait "%{OPTIONS::Timers::EmergencyMeeting}% seconds" parsed as timespan
+					set {ImpostersMC::Game::AllowedToTalk} to false
+
+					# Delete everyone's voted.
+					delete {ImpostersMC::Game::Voted::*}
+								
 		else if {_t} is "reportBody":
 			loop all players:
-				if loop-player's world is "{@World}":
-					set {ImpostersMC::Game::Voted::%loop-player%} to false
+				if loop-player's world is "%{OPTIONS::General::World}%":
+					delete {ImpostersMC::Game::Voted::%loop-player%}
 					delete {ImpostersMC::Game::Votes::%loop-player%::*}
 
 			# Broadcast to the entire world that the player reported a body.
-			broadcast "&6%{_p}% &ehas reported a body!" in world("{@World}")
-			broadcast "&eTo vote on someone, just type their name in chat."
+			broadcast "&6%{_p}% &ehas reported a body!" in world("%{OPTIONS::General::World}%")
+			broadcast "&eTo vote on someone, just type their name in chat." in world("%{OPTIONS::General::World}%")
 
 			# Loop all people on server.
 			loop all players:
 				# If the player is in the ImpostersMC world.
-				if loop-player's world is "{@World}":
+				if loop-player's world is "%{OPTIONS::General::World}%":
 					# Set {_players::*} to all of the players.
-					set {_players::*} to all players in world("{@World}")
+					set {_players::*} to all players in world("%{OPTIONS::General::World}%")
 
 					# Set {_playerscount} to the amount of players.
 					set {_playerscount} to size of {_players::*}
@@ -1093,6 +1554,8 @@ function callMeeting(p: player, t: text):
 						# Teleport the player to the emergency meeting seat.
 						teleport {_var2} to {_var}
 
+					freezePlayer(loop-player)
+
 			# Set the allowed to talk variable to true.
 			set {ImpostersMC::Game::AllowedToTalk} to true
 
@@ -1100,8 +1563,8 @@ function callMeeting(p: player, t: text):
 			clear {ImpostersMC::Game::Vote::*}
 			clear {ImpostersMC::Game::VoteList::*}
 
-			wait {@EmergencyMeeting} seconds
-			set {ImpostersMC::Game::AllowedToTalk} to false
+			wait "%{OPTIONS::Timers::EmergencyMeeting}% seconds" parsed as timespan
+			set {ImpostersMC::Game::AllowedToTalk} to true
 
 			# Delete everyone's voted.
 			delete {ImpostersMC::Game::Voted::*}
@@ -1129,379 +1592,386 @@ function freezePlayer(p: player):
 
 function DoTask(p: player, job: text):
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
-		if {_job} is "S: Fix Lights":
-			freezePlayer({_p})
-			# Send a lime green message saying repairing.
-			send "&aRepairing..." to {_p}
-			# Wait 2 seconds.
-			wait 5 seconds
-			finishTask({_p}, "%{_job}%")
-			set block at location(109, 38, 352, "{@World}" parsed as world) to redstone block
-			# Send a lime green message saying repaired.
-			send "&aRepaired!" to {_p}
-
-		else if {_job} is "S: Comms":
-			freezePlayer({_p})
-			# Send a lime green message saying repairing.
-			send "&aRepairing..." to {_p}
-			# Wait 2 seconds.
-			wait 5 seconds
-			finishTask({_p}, "%{_job}%")
-			set block at location(149, 34, 376, "{@World}" parsed as world) to air
-			set block at location(149, 35, 376, "{@World}" parsed as world) to air
-			set block at location(149, 36, 376, "{@World}" parsed as world) to air
-
-			set block at location(149, 34, 375, "{@World}" parsed as world) to air
-			set block at location(149, 35, 375, "{@World}" parsed as world) to air
-			set block at location(149, 36, 375, "{@World}" parsed as world) to air
-
-			set block at location(149, 34, 374, "{@World}" parsed as world) to air
-			set block at location(149, 35, 374, "{@World}" parsed as world) to air
-			set block at location(149, 36, 374, "{@World}" parsed as world) to air
-			# Send a lime green message saying repaired.
-			send "&aRepaired!" to {_p}
-
-		else if {_job} is "S: Fix O2: 1":
-			freezePlayer({_p})
-			# Send a lime green message saying repairing.
-			send "&aRepairing..." to {_p}
-			# Wait 2 seconds.
-			wait 5 seconds
-			finishTask({_p}, "%{_job}%")
-			# Send a lime green message saying repaired.
-			send "&aRepaired!" to {_p}
-			add 1 to {ImpostersMC::Game::Sabotage::O2::Finished}
-			if {ImpostersMC::Game::Sabotage::O2::Finished} is 2:
-				set {ImpostersMC::Game::Sabotage::O2::Finished} to 0
-				set {ImpostersMC::Game::Sabotage::O2} to false
-
-		else if {_job} is "S: Fix O2: 2":
-			freezePlayer({_p})
-			# Send a lime green message saying repairing.
-			send "&aRepairing..." to {_p}
-			# Wait 2 seconds.
-			wait 5 seconds
-			finishTask({_p}, "%{_job}%")
-			# Send a lime green message saying repaired.
-			send "&aRepaired!" to {_p}
-			add 1 to {ImpostersMC::Game::Sabotage::O2::Finished}
-			if {ImpostersMC::Game::Sabotage::O2::Finished} is 2:
-				set {ImpostersMC::Game::Sabotage::O2::Finished} to 0
-				set {ImpostersMC::Game::Sabotage::O2} to false
-
-		else if {ImpostersMC::Game::Info::Tasks::%{_p}%::*} contains {_job}:
-			if {_job} is "Medbay: Scan":
+		set {ImpostersMC::Game::DoingTask::%{_p}%} to false
+		if {ImpostersMC::Game::DoingTask::%{_p}%} is false:
+			set {ImpostersMC::Game::DoingTask::%{_p}%} to true
+			if {_job} is "S: Fix Lights":
 				freezePlayer({_p})
-				open chest with 3 rows named "&0SCAN-MO-TRON-2000" to {_p}
-				wait 1 second
-				format slot 10 of {_p} with paper named "&7NAME: &e%{_p}%" to be unstealable
-				wait 1 second
-				format slot 12 of {_p} with wool named "&7PING: &e%{_p}'s ping%" to be unstealable
-				wait 1 second
-				format slot 14 of {_p} with beacon named "&7HEIGHT: &e3' 6""" to be unstealable
-				wait 1 second
-				format slot 16 of {_p} with anvil named "&7WEIGHT: &e92lb" to be unstealable
-				wait 2 seconds
-				close {_p}'s inventory
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Storage: Fuel":
-				freezePlayer({_p})
-				open chest with 3 rows named "&0Fuel" to {_p}
-				wait 3 ticks
-				set slot 13 of {_p}'s current inventory to a lava bucket named "&4&lFuel" with lore "Click me to restore fuel."
-
-			else if {_job} is "Electric: Upload":
-				freezePlayer({_p})
-				send "&a&lUploading Data..." to {_p}
+				# Send a lime green message saying repairing.
+				send "&aRepairing..." to {_p}
+				# Wait 2 seconds.
 				wait 5 seconds
-				send "&a&lUploaded Data!" to {_p}
 				finishTask({_p}, "%{_job}%")
+				set block at location(109, 38, 352, "%{OPTIONS::General::World}%" parsed as world) to redstone block
+				# Send a lime green message saying repaired.
+				send "&aRepaired!" to {_p}
 
-			else if {_job} is "Cafeteria: Upload":
+			else if {_job} is "S: Comms":
 				freezePlayer({_p})
-				send "&a&lUploading Data..." to {_p}
+				# Send a lime green message saying repairing.
+				send "&aRepairing..." to {_p}
+				# Wait 2 seconds.
 				wait 5 seconds
-				send "&a&lUploaded Data!" to {_p}
 				finishTask({_p}, "%{_job}%")
+				set block at location(149, 34, 376, "%{OPTIONS::General::World}%" parsed as world) to air
+				set block at location(149, 35, 376, "%{OPTIONS::General::World}%" parsed as world) to air
+				set block at location(149, 36, 376, "%{OPTIONS::General::World}%" parsed as world) to air
 
-			else if {_job} is "Admin: Swipe Card":
-				chance of 10%:
-					send "&aSuccess!" to {_p}
-					finishTask({_p}, "Admin: Swipe Card")
+				set block at location(149, 34, 375, "%{OPTIONS::General::World}%" parsed as world) to air
+				set block at location(149, 35, 375, "%{OPTIONS::General::World}%" parsed as world) to air
+				set block at location(149, 36, 375, "%{OPTIONS::General::World}%" parsed as world) to air
+
+				set block at location(149, 34, 374, "%{OPTIONS::General::World}%" parsed as world) to air
+				set block at location(149, 35, 374, "%{OPTIONS::General::World}%" parsed as world) to air
+				set block at location(149, 36, 374, "%{OPTIONS::General::World}%" parsed as world) to air
+				# Send a lime green message saying repaired.
+				send "&aRepaired!" to {_p}
+
+			else if {_job} is "S: Fix O2: 1":
+				freezePlayer({_p})
+				# Send a lime green message saying repairing.
+				send "&aRepairing..." to {_p}
+				# Wait 2 seconds.
+				wait 5 seconds
+				finishTask({_p}, "%{_job}%")
+				# Send a lime green message saying repaired.
+				send "&aRepaired!" to {_p}
+				add 1 to {ImpostersMC::Game::Sabotage::O2::Finished}
+				if {ImpostersMC::Game::Sabotage::O2::Finished} is 2:
+					set {ImpostersMC::Game::Sabotage::O2::Finished} to 0
+					set {ImpostersMC::Game::Sabotage::O2} to false
+
+			else if {_job} is "S: Fix O2: 2":
+				freezePlayer({_p})
+				# Send a lime green message saying repairing.
+				send "&aRepairing..." to {_p}
+				# Wait 2 seconds.
+				wait 5 seconds
+				finishTask({_p}, "%{_job}%")
+				# Send a lime green message saying repaired.
+				send "&aRepaired!" to {_p}
+				add 1 to {ImpostersMC::Game::Sabotage::O2::Finished}
+				if {ImpostersMC::Game::Sabotage::O2::Finished} is 2:
+					set {ImpostersMC::Game::Sabotage::O2::Finished} to 0
+					set {ImpostersMC::Game::Sabotage::O2} to false
+
+			else if {ImpostersMC::Game::Info::Tasks::%{_p}%::*} contains {_job}:
+				if {_job} is "Medbay: Scan":
+					freezePlayer({_p})
+					open chest inventory with 3 rows named "&0SCAN-MO-TRON-2000" to {_p}
+					wait 1 second
+					set slot 10 of {_p}'s current inventory to nametag named "&6Name:" with lore "&e%{_p}'s name%"
+					wait 1 second
+					set slot 12 of {_p}'s current inventory to wool named "&6Ping:" with lore "&e%{_p}'s ping%"
+					wait 1 second
+					set slot 14 of {_p}'s current inventory to iron bars named "&6Role:" with lore "&e%{ImpostersMC::Game::Info::Job::%{_p}%}%"
+					wait 1 second
+					set slot 16 of {_p}'s current inventory to paper named "&6Tasks:" with lore "&e%{ImpostersMC::Game::Info::Tasks::%{_p}%::*}%"
+					wait 2 seconds
 					close {_p}'s inventory
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Storage: Fuel":
+					freezePlayer({_p})
+					open chest inventory with 3 rows named "&0Fuel" to {_p}
+					wait 3 ticks
+					set slot 13 of {_p}'s current inventory to a lava bucket named "&4&lFuel" with lore "Click me to restore fuel."
+
+				else if {_job} is "Electric: Upload":
+					freezePlayer({_p})
+					send "&a&lUploading Data..." to {_p}
+					wait 5 seconds
+					send "&a&lUploaded Data!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Cafeteria: Upload":
+					freezePlayer({_p})
+					send "&a&lUploading Data..." to {_p}
+					wait 5 seconds
+					send "&a&lUploaded Data!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Admin: Swipe Card":
+					chance of 10%:
+						send "&aSuccess!" to {_p}
+						finishTask({_p}, "Admin: Swipe Card")
+						close {_p}'s inventory
+					else:
+						send "&cFailure!" to {_p}
+
+				else if {_job} is "Comms: Upload":
+					freezePlayer({_p})
+					send "&a&lUploading Data..." to {_p}
+					wait 5 seconds
+					send "&a&lUploaded Data!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Comms: Divert":
+					freezePlayer({_p})
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+					# Send a lime green message saying repairing.
+					send "&aRepairing..." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aRepaired!" to {_p}
+
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+				else if {_job} is "Electric: Upload":
+					freezePlayer({_p})
+					send "&a&lUploading Data..." to {_p}
+					wait 5 seconds
+					send "&a&lUploaded Data!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Cafeteria: Empty":
+					freezePlayer({_p})
+					send "&a&lThrowing out garbage." to {_p}
+					wait 2 seconds
+					send "&a&lThrew out the garbage!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Electric: Fix":
+					freezePlayer({_p})
+					open chest inventory with 4 rows named "&0Fix wiring (click the glass panes)" to {_p}
+					set slot 0 of {_p}'s current inventory to red stained glass pane named "&c&lRed Wire" with lore "Click me to connect!"
+					set slot 1 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 2 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 3 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 4 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 5 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 6 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 7 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 8 of {_p}'s current inventory to red stained glass pane named "&c&lRed Wire" with lore "Click me to connect!"
+					set slot 9 of {_p}'s current inventory to yellow stained glass pane named "&e&lYellow Wire" with lore "Click me to connect!"
+					set slot 10 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 11 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 12 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 13 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 14 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 15 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 16 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 17 of {_p}'s current inventory to yellow stained glass pane named "&e&lYellow Wire" with lore "Click me to connect!"
+					set slot 18 of {_p}'s current inventory to pink stained glass pane named "&d&lPink Wire" with lore "Click me to connect!"
+					set slot 19 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 20 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 21 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 22 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 23 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 24 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 25 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 26 of {_p}'s current inventory to pink stained glass pane named "&d&lPink Wire" with lore "Click me to connect!"
+					set slot 27 of {_p}'s current inventory to blue stained glass pane named "&b&lBlue Wire" with lore "Click me to connect!"
+					set slot 28 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 29 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 30 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 31 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 32 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 33 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 34 of {_p}'s current inventory to white stained glass pane named "&6Not connected!" with lore "&eNot connected to any wires."
+					set slot 35 of {_p}'s current inventory to blue stained glass pane named "&b&lBlue Wire" with lore "Click me to connect!"
+
+				else if {_job} is "Electric: Calibrate":
+					freezePlayer({_p})
+					send "&e&lCalibrating Yellow..." to {_p}
+					wait 5 seconds
+					send "&e&lCalibrated Yellow!" to {_p}
+
+					wait 1 second
+
+					send "&9&lCalibrating Blue..." to {_p}
+					wait 5 seconds
+					send "&9&lCalibrated Blue!" to {_p}
+
+					wait 1 second
+
+					send "&b&lCalibrating Aqua..." to {_p}
+					wait 5 seconds
+					send "&b&lCalibrated Aqua!" to {_p}
+
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Upper Engine":
+					freezePlayer({_p})
+					# Send a lime green message saying repairing.
+					send "&aAligining.." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aAligined!" to {_p}
+
+				else if {_job} is "Lower Engine":
+					freezePlayer({_p})
+					# Send a lime green message saying repairing.
+					send "&aAligining.." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aAligined!" to {_p}
+
+				else if {_job} is "Nav: Chart":
+					freezePlayer({_p})
+					open chest inventory with 6 rows named "&0Chart Course" to {_p}
+					set slot 34 of {_p}'s current inventory to iron block named "&b4" with lore "Click me in order of bottom to top!"
+					set slot 15 of {_p}'s current inventory to iron block named "&43" with lore "Click me in order of bottom to top!"
+					set slot 21 of {_p}'s current inventory to iron block named "&c2" with lore "Click me in order of bottom to top!"
+					set slot 37 of {_p}'s current inventory to iron block named "&a1" with lore "Click me in order of bottom to top!"
+
+				else if {_job} is "Nav: Upload":
+					freezePlayer({_p})
+					send "&a&lUploading Data..." to {_p}
+					wait 5 seconds
+					send "&a&lUploaded Data!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Nav: Divert":
+					freezePlayer({_p})
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+					# Send a lime green message saying repairing.
+					send "&aRepairing..." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aRepaired!" to {_p}
+
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+				else if {_job} is "Nav: Stabilize":
+					freezePlayer({_p})
+					# Send a lime green message saying repairing.
+					send "&aStabilizing.." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aStabilized!" to {_p}
+
+				else if {_job} is "O2: Empty chute":
+					freezePlayer({_p})
+					send "&a&lEmptying chute." to {_p}
+					wait 2 seconds
+					send "&a&lEmptied chute!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "O2: Upload":
+					freezePlayer({_p})
+					send "&a&lUploading Data..." to {_p}
+					wait 5 seconds
+					send "&a&lUploaded Data!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "O2: Clean filter":
+					freezePlayer({_p})
+					send "&a&lCleaning..." to {_p}
+					wait 5 seconds
+					send "&a&lCleaned!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Security: Divert":
+					freezePlayer({_p})
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+					# Send a lime green message saying repairing.
+					send "&aRepairing..." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aRepaired!" to {_p}
+
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+				else if {_job} is "Shields: Prime":
+					freezePlayer({_p})
+					send "&a&lPriming..." to {_p}
+					wait 5 seconds
+					send "&a&lPrimed!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Shields: Divert":
+					freezePlayer({_p})
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+					# Send a lime green message saying repairing.
+					send "&aRepairing..." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aRepaired!" to {_p}
+
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+				else if {_job} is "Weapons: Divert":
+					freezePlayer({_p})
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+					# Send a lime green message saying repairing.
+					send "&aRepairing..." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aRepaired!" to {_p}
+
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+					# IMPLEMENT LATER.
+
+				else if {_job} is "Weapons: Clear":
+					freezePlayer({_p})
+					send "&a&lClearing asteroids..." to {_p}
+					wait 5 seconds
+					send "&a&lCleared asteroids!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
+				else if {_job} is "Weapons: Upload":
+					freezePlayer({_p})
+					send "&a&lUploading Data..." to {_p}
+					wait 5 seconds
+					send "&a&lUploaded Data!" to {_p}
+					finishTask({_p}, "%{_job}%")
+
 				else:
-					send "&cFailure!" to {_p}
-
-			else if {_job} is "Comms: Upload":
-				freezePlayer({_p})
-				send "&a&lUploading Data..." to {_p}
-				wait 5 seconds
-				send "&a&lUploaded Data!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Comms: Divert":
-				freezePlayer({_p})
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-				# Send a lime green message saying repairing.
-				send "&aRepairing..." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aRepaired!" to {_p}
-
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-			else if {_job} is "Electric: Upload":
-				freezePlayer({_p})
-				send "&a&lUploading Data..." to {_p}
-				wait 5 seconds
-				send "&a&lUploaded Data!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Cafeteria: Empty":
-				freezePlayer({_p})
-				send "&a&lThrowing out garbage." to {_p}
-				wait 2 seconds
-				send "&a&lThrew out the garbage!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Electric: Fix":
-				freezePlayer({_p})
-				open chest with 4 rows named "&0Fix wiring (click the glass panes)" to {_p}
-				wait 3 ticks
-				set slot 0 of {_p}'s current inventory to red stained glass named "&c&lRed Wire" with lore "Click me to connect!"
-				format slot 19 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 2 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 3 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 4 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 5 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 6 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 7 of {_p} with white stained glass pane named "&f" to be unstealable
-				set slot 8 of {_p}'s current inventory to red stained glass named "&c&lRed Wire" with lore "Click me to connect!"
-				set slot 9 of {_p}'s current inventory to yellow stained glass named "&e&lYellow Wire" with lore "Click me to connect!"
-				format slot 10 of {_p} with white stained glass pane named "&f" to be unstealable # HERE
-				format slot 11 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 12 of {_p} with white stained glass pane named "&f" to be unstealable # HERE
-				format slot 13 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 14 of {_p} with white stained glass pane named "&f" to be unstealable # HERE
-				format slot 15 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 16 of {_p} with white stained glass pane named "&f" to be unstealable # HERE
-				set slot 17 of {_p}'s current inventory to yellow stained glass named "&e&lYellow Wire" with lore "Click me to connect!"
-				set slot 18 of {_p}'s current inventory to pink stained glass named "&d&lPink Wire" with lore "Click me to connect!"
-				format slot 19 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 20 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 21 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 22 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 23 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 24 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 25 of {_p} with white stained glass pane named "&f" to be unstealable
-				set slot 26 of {_p}'s current inventory to pink stained glass named "&d&lPink Wire" with lore "Click me to connect!"
-				set slot 27 of {_p}'s current inventory to blue stained glass pane named "&b&lBlue Wire" with lore "Click me to connect!"
-				format slot 28 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 29 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 30 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 31 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 32 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 33 of {_p} with white stained glass pane named "&f" to be unstealable
-				format slot 34 of {_p} with white stained glass pane named "&f" to be unstealable
-				set slot 35 of {_p}'s current inventory to blue stained glass pane named "&b&lBlue Wire" with lore "Click me to connect!"
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Electric: Calibrate":
-				freezePlayer({_p})
-				send "&e&lCalibrating Yellow..." to {_p}
-				wait 5 seconds
-				send "&e&lCalibrated Yellow!" to {_p}
-
-				wait 1 second
-
-				send "&9&lCalibrating Blue..." to {_p}
-				wait 5 seconds
-				send "&9&lCalibrated Blue!" to {_p}
-
-				wait 1 second
-
-				send "&b&lCalibrating Aqua..." to {_p}
-				wait 5 seconds
-				send "&b&lCalibrated Aqua!" to {_p}
-
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Upper Engine":
-				freezePlayer({_p})
-				# Send a lime green message saying repairing.
-				send "&aAligining.." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aAligined!" to {_p}
-
-			else if {_job} is "Lower Engine":
-				freezePlayer({_p})
-				# Send a lime green message saying repairing.
-				send "&aAligining.." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aAligined!" to {_p}
-
-			else if {_job} is "Nav: Chart":
-				freezePlayer({_p})
-				open chest with 6 rows named "&0Chart Course" to {_p}
-				set slot 34 of {_p}'s current inventory to iron block named "&b4" with lore "Click me in order of bottom to top!"
-				set slot 15 of {_p}'s current inventory to iron block named "&43" with lore "Click me in order of bottom to top!"
-				set slot 21 of {_p}'s current inventory to iron block named "&c2" with lore "Click me in order of bottom to top!"
-				set slot 37 of {_p}'s current inventory to iron block named "&a1" with lore "Click me in order of bottom to top!"
-
-			else if {_job} is "Nav: Upload":
-				freezePlayer({_p})
-				send "&a&lUploading Data..." to {_p}
-				wait 5 seconds
-				send "&a&lUploaded Data!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Nav: Divert":
-				freezePlayer({_p})
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-				# Send a lime green message saying repairing.
-				send "&aRepairing..." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aRepaired!" to {_p}
-
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-			else if {_job} is "Nav: Stabilize":
-				freezePlayer({_p})
-				# Send a lime green message saying repairing.
-				send "&aStabilizing.." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aStabilized!" to {_p}
-
-			else if {_job} is "O2: Empty chute":
-				freezePlayer({_p})
-				send "&a&lEmptying chute." to {_p}
-				wait 2 seconds
-				send "&a&lEmptied chute!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "O2: Upload":
-				freezePlayer({_p})
-				send "&a&lUploading Data..." to {_p}
-				wait 5 seconds
-				send "&a&lUploaded Data!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "O2: Clean filter":
-				freezePlayer({_p})
-				send "&a&lCleaning..." to {_p}
-				wait 5 seconds
-				send "&a&lCleaned!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Security: Divert":
-				freezePlayer({_p})
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-				# Send a lime green message saying repairing.
-				send "&aRepairing..." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aRepaired!" to {_p}
-
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-			else if {_job} is "Shields: Prime":
-				freezePlayer({_p})
-				send "&a&lPriming..." to {_p}
-				wait 5 seconds
-				send "&a&lPrimed!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Shields: Divert":
-				freezePlayer({_p})
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-				# Send a lime green message saying repairing.
-				send "&aRepairing..." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aRepaired!" to {_p}
-
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-			else if {_job} is "Weapons: Divert":
-				freezePlayer({_p})
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-				# Send a lime green message saying repairing.
-				send "&aRepairing..." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aRepaired!" to {_p}
-
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-				# IMPLEMENT LATER.
-
-			else if {_job} is "Weapons: Clear":
-				freezePlayer({_p})
-				send "&a&lClearing asteroids..." to {_p}
-				wait 5 seconds
-				send "&a&lCleared asteroids!" to {_p}
-				finishTask({_p}, "%{_job}%")
-
-			else if {_job} is "Weapons: Upload":
-				freezePlayer({_p})
-				send "&a&lUploading Data..." to {_p}
-				wait 5 seconds
-				send "&a&lUploaded Data!" to {_p}
-				finishTask({_p}, "%{_job}%")
+					freezePlayer({_p})
+					# Send a lime green message saying repairing.
+					send "&aRepairing..." to {_p}
+					# Wait 2 seconds.
+					wait 2 seconds
+					finishTask({_p}, "%{_job}%")
+					# Send a lime green message saying repaired.
+					send "&aRepaired!" to {_p}
 
 			else:
-				freezePlayer({_p})
-				# Send a lime green message saying repairing.
-				send "&aRepairing..." to {_p}
-				# Wait 2 seconds.
-				wait 2 seconds
-				finishTask({_p}, "%{_job}%")
-				# Send a lime green message saying repaired.
-				send "&aRepaired!" to {_p}
+				send "&eYou do not have this task!" to {_p}
+
+		else:
+			send "&eYou can not do another task, please wait until your current one is finished!" to {_p}
 
 
 
@@ -1511,6 +1981,9 @@ function finishTask(p: player, t: text):
 		remove "%{_t}%" from {ImpostersMC::Game::Info::Tasks::%{_p}%::*}
 		remove "%{_t}%" from {ImpostersMC::Game::Tasks::*}
 		send title "&eCompleted Task!" with subtitle "&6%{_t}%" to {_p} for 5 seconds
+		set {ImpostersMC::Game::DoingTask::%{_p}%} to false
+
+		updateBoard({_p})
 
 		set {_slot} to "%size of {ImpostersMC::Game::Info::Tasks::%{_p}%::*}%" parsed as number
 
@@ -1524,7 +1997,7 @@ function finishTask(p: player, t: text):
 			# Send a message in gold saying they have finished all their tasks.
 			send "%NL%&6You have finished all your tasks!%NL%" to {_p}
 			# Broadcast as message in gold saying the player has finished all their tasks.
-			broadcast "&6%{_p}% &ehas finished all their tasks!" in world("{@World}")
+			broadcast "&6%{_p}% &ehas finished all their tasks!" in world("%{OPTIONS::General::World}%")
 
 		if {ImpostersMC::Game::Started} is true:
 			if size of {ImpostersMC::Game::Tasks::*} is 0:
@@ -1542,12 +2015,13 @@ function sabotage(p: player, t: text):
 				# Set the Sabotage Cooldown Lights Cooldown to true.
 				set {ImpostersMC::SabotageCooldown_Lights::OnCooldown} to true
 				# Set the Sabotage Cooldown Lights Time to the SabotageCooldown_Lights variable.
-				set {ImpostersMC::SabotageCooldown_Lights::Time} to {@SabotageCooldown_Lights}
+				set {ImpostersMC::SabotageCooldown_Lights::Time} to {OPTIONS::Cooldown::Sabotages::Lights}
 
 				set {ImpostersMC::Game::Sabotage::O2} to true
 
 				send "&cYou have sabotaged the lights." to {_p}
-				broadcast "&cFix lights!" in world("{@World}")
+				broadcast "&cFix lights!" in world("%{OPTIONS::General::World}%")
+				send title "&4&lSabotaged" with subtitle "&cFix %{_t}%" to all players in world("%{OPTIONS::General::World}%") for 3 seconds
 
 		else if {_t} is "o2":
 			if {ImpostersMC::SabotageCooldown_O2::OnCooldown} is true:
@@ -1557,12 +2031,13 @@ function sabotage(p: player, t: text):
 				# Set the Sabotage Cooldown Lights Cooldown to true.
 				set {ImpostersMC::SabotageCooldown_O2::OnCooldown} to true
 				# Set the Sabotage Cooldown Lights Time to the SabotageCooldown_Lights variable.
-				set {ImpostersMC::SabotageCooldown_O2::Time} to {@SabotageCooldown_O2}
+				set {ImpostersMC::SabotageCooldown_O2::Time} to {OPTIONS::Cooldown::Sabotages::O2}
 
 				set {ImpostersMC::Game::Sabotage::O2} to true
 
 				send "&cYou have sabotaged the O2." to {_p}
-				broadcast "&cFix O2!" in world("{@World}")
+				broadcast "&cFix O2!" in world("%{OPTIONS::General::World}%")
+				send title "&4&lSabotaged" with subtitle "&cFix %{_t}%" to all players in world("%{OPTIONS::General::World}%") for 3 seconds
 
 		else if {_t} is "comms":
 			if {ImpostersMC::SabotageCooldown_Comms::OnCooldown} is true:
@@ -1572,50 +2047,66 @@ function sabotage(p: player, t: text):
 				# Set the Sabotage Cooldown Lights Cooldown to true.
 				set {ImpostersMC::SabotageCooldown_Comms::OnCooldown} to true
 				# Set the Sabotage Cooldown Lights Time to the SabotageCooldown_Lights variable.
-				set {ImpostersMC::SabotageCooldown_Comms::Time} to {@SabotageCooldown_Comms}
+				set {ImpostersMC::SabotageCooldown_Comms::Time} to {OPTIONS::Cooldown::Sabotages::Comms}
 
-				set block at location(149, 34, 376, "{@World}" parsed as world) to iron block
-				set block at location(149, 35, 376, "{@World}" parsed as world) to iron block
-				set block at location(149, 36, 376, "{@World}" parsed as world) to iron block
+				set block at location(149, 34, 376, "%{OPTIONS::General::World}%" parsed as world) to iron block
+				set block at location(149, 35, 376, "%{OPTIONS::General::World}%" parsed as world) to iron block
+				set block at location(149, 36, 376, "%{OPTIONS::General::World}%" parsed as world) to iron block
 
-				set block at location(149, 34, 375, "{@World}" parsed as world) to iron block
-				set block at location(149, 35, 375, "{@World}" parsed as world) to iron block
-				set block at location(149, 36, 375, "{@World}" parsed as world) to iron block
+				set block at location(149, 34, 375, "%{OPTIONS::General::World}%" parsed as world) to iron block
+				set block at location(149, 35, 375, "%{OPTIONS::General::World}%" parsed as world) to iron block
+				set block at location(149, 36, 375, "%{OPTIONS::General::World}%" parsed as world) to iron block
 
-				set block at location(149, 34, 374, "{@World}" parsed as world) to iron block
-				set block at location(149, 35, 374, "{@World}" parsed as world) to iron block
-				set block at location(149, 36, 374, "{@World}" parsed as world) to iron block
+				set block at location(149, 34, 374, "%{OPTIONS::General::World}%" parsed as world) to iron block
+				set block at location(149, 35, 374, "%{OPTIONS::General::World}%" parsed as world) to iron block
+				set block at location(149, 36, 374, "%{OPTIONS::General::World}%" parsed as world) to iron block
 
 				send "&cYou have sabotaged the comms." to {_p}
-				broadcast "&cFix comms!" in world("{@World}")
+				broadcast "&cFix comms!" in world("%{OPTIONS::General::World}%")
+				send title "&4&lSabotaged" with subtitle "&cFix %{_t}%" to all players in world("%{OPTIONS::General::World}%") for 3 seconds
 
+
+
+function hostGame(p: player):
+	if {ImpostersMC::Game::Hosted} is false:
+		resetEverything()
+		broadcast "&6%{_p}% &ehas hosted a game!%nl%" in world("%{OPTIONS::General::World}%")
+		# Loop all players.
+		loop all players:
+			# If the loop player is in the world.
+			if loop-player's world is "%{OPTIONS::General::World}%":
+				teleport loop-player to location(122, 6, 496, "%{OPTIONS::General::World}%" parsed as world)
+				gameUpdateBoard(loop-player)
+		set {ImpostersMC::Game::Hosted} to true
+	else:
+		send "&6A game has already been hosted." to {_p}
 
 
 function startGame(p: player):
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		if {ImpostersMC::Game::Started} is false:
-			broadcast "&6%{_p}% &ehas started the game!%nl%" in world("{@World}")
+			broadcast "&6%{_p}% &ehas started the game!%nl%" in world("%{OPTIONS::General::World}%")
 			wait 1 second
-			broadcast "&6Starting in %nl%&e5 second(s)" in world("{@World}")
+			broadcast "&6Starting in %nl%&e5 second(s)" in world("%{OPTIONS::General::World}%")
 			wait 1 second
-			broadcast "&e4 second(s)" in world("{@World}")
+			broadcast "&e4 second(s)" in world("%{OPTIONS::General::World}%")
 			wait 1 second
-			broadcast "&e3 second(s)" in world("{@World}")
+			broadcast "&e3 second(s)" in world("%{OPTIONS::General::World}%")
 			wait 1 second
-			broadcast "&e2 second(s)" in world("{@World}")
+			broadcast "&e2 second(s)" in world("%{OPTIONS::General::World}%")
 			wait 1 second
-			broadcast "&e1 second(s)" in world("{@World}")
+			broadcast "&e1 second(s)" in world("%{OPTIONS::General::World}%")
 			wait 1 second
 
 			# Loop all players.
 			loop all players:
 				# If the loop player is in the world.
-				if loop-player's world is "{@World}":
+				if loop-player's world is "%{OPTIONS::General::World}%":
 					# Set loop players nametag to blank.
 					set loop-player's nametag to ""
 
 					# Set {_players::*} to all of the players.
-					set {_players::*} to all players in world("{@World}")
+					set {_players::*} to all players in world("%{OPTIONS::General::World}%")
 
 					# Set {_playerscount} to the amount of players.
 					set {_playerscount} to size of {_players::*}
@@ -1633,44 +2124,51 @@ function startGame(p: player):
 						# Teleport the player to the emergency meeting seat.
 						teleport {_var2} to {_var}
 
-			if number of all players is greater than 7:
+			set {number} to amount of all players in world("%{OPTIONS::General::World}%")
+
+			if {number} is greater than 7:
 				loop 2 times:
-					add a random element out of all players to {ImpostersMC::Game::Imposters::*} 
+					add a random element out of all players in world("%{OPTIONS::General::World}%") to {ImpostersMC::Game::Imposters::*} 
 			else:
-				set {ImpostersMC::Game::Imposters::*} to a random element out of all players
+				set {ImpostersMC::Game::Imposters::*} to a random element out of all players in world("%{OPTIONS::General::World}%")
 
 
 			loop all players:
-				if {ImpostersMC::Game::Imposters::*} contains "%Loop-player%":
-					send "&6%{ImpostersMC::Game::Imposters::*}% &eare &c&limposters!%nl%&7(note: others can't see this message)" to loop-player
-					set {ImpostersMC::Game::Info::Job::%loop-player%} to "imposter"
-					
-					set loop-player's gamemode to survival
-				else:
-					send "&a&lYou are a crewmate!" to loop-player
-					set {ImpostersMC::Game::Info::Job::%loop-player%} to "crewmate"
+				#set {ImpostersMC::Game::Info::Tasks::Finished::%loop-player%} to 0
+				if loop-player's world is "%{OPTIONS::General::World}%":
+					if {ImpostersMC::Game::Imposters::*} contains "%loop-player%":
+						send "&6%{ImpostersMC::Game::Imposters::*}% &eare &c&limposters!%nl%&7(note: others can't see this message)" to loop-player
+						set {ImpostersMC::Game::Info::Job::%loop-player%} to "imposter"
+						
+						set loop-player's gamemode to survival
+					else:
+						send "&a&lYou are a crewmate!" to loop-player
+						set {ImpostersMC::Game::Info::Job::%loop-player%} to "crewmate"
 
-					add loop-player to {ImpostersMC::Game::Crewmates::*}
+						add loop-player to {ImpostersMC::Game::Crewmates::*}
 
-					set loop-player's gamemode to survival
+						set loop-player's gamemode to survival
 
-					loop 4 times:
-						set {_var} to random element out of {ImpostersMC::Game::Tasks::*}
-						add {_var} to {ImpostersMC::Game::Info::Tasks::%loop-player%::*}
-						remove {_var} from {ImpostersMC::Game::Tasks::*}
+						loop 4 times:
+							set {_var} to random element out of {ImpostersMC::Game::Tasks::*}
+							add {_var} to {ImpostersMC::Game::Info::Tasks::%loop-player%::*}
+							remove {_var} from {ImpostersMC::Game::Tasks::*}
 
 			delete {ImpostersMC::Game::Tasks::*}
 
 			loop all players:
-				if loop-player's world is "{@World}":
+				if loop-player's world is "%{OPTIONS::General::World}%":
 					# Add all real tasks to the Tasks variable.
 					add {ImpostersMC::Game::Info::Tasks::%loop-player%::*} to {ImpostersMC::Game::Tasks::*}
+					getTasks(loop-player)
+					updateBoard(loop-player)
+					set {ImpostersMC::Game::DoingTask::%loop-player%} to false
 
 			# Set the game started to true.
 			set {ImpostersMC::Game::Started} to true
 
 			# Set the allowed to talk variable to false.
-			set {ImpostersMC::Game::AllowedToTalk} to false
+			set {ImpostersMC::Game::AllowedToTalk} to true
 		else:
 			# Say to the host that the game already loefstarted.
 			send "&6The game has already started" to {_p}
@@ -1680,14 +2178,15 @@ function startGame(p: player):
 function endGame(p: player):
 	if {ImpostersMC::SecurityCheck::ishallnotsteal::Failed} is false:
 		if {ImpostersMC::Game::Started} is true:
-			broadcast "&6%{_p}% &ehas ended the game!" in world("{@World}")
+			broadcast "&6%{_p}% &ehas ended the game!" in world("%{OPTIONS::General::World}%")
 
 			# Loop all players.
 			loop all players:
 				# If the loop player is in the world.
-				if loop-player's world is "{@World}":
+				if loop-player's world is "%{OPTIONS::General::World}%":
 					# Set the nametag back to normal.
 					set loop-player's nametag to loop-player's name
+					clear loop-player's scoreboard
 
 			# Set the game started to true
 			set {ImpostersMC::Game::Started} to false
@@ -1707,6 +2206,8 @@ function resetEverything():
 	delete {ImpostersMC::EmergencyMeeting::OnCooldown}
 	# Set the game started to false.
 	set {ImpostersMC::Game::Started} to false
+	# Set the game hosted to false.
+	set {ImpostersMC::Game::Hosted} to false
 	# Delete everyone's game info.
 	delete {ImpostersMC::Game::Info::*}
 	# Delete all of the tasks.
@@ -1730,8 +2231,13 @@ function resetEverything():
 
 	delete {ImpostersMC::Game::VoteList::*}
 
+	delete {ImpostersMC::Dead::*}
+
 	# Set allowed to talk in chat varible to true.
 	set {ImpostersMC::Game::AllowedToTalk} to true
+
+	# Set the player's doing task to false.
+	set {ImpostersMC::Game::DoingTask::*} to false
 
 	# Add all real tasks to the Tasks variable.
 	add "Lower Engine" to {ImpostersMC::Game::Tasks::*}
@@ -1762,22 +2268,31 @@ function resetEverything():
 	add "Security: Divert" to {ImpostersMC::Game::Tasks::*}
 	add "Medbay: Scan" to {ImpostersMC::Game::Tasks::*}
 
+	set {ImpostersMC::Game::Settings::Imposters} to {OPTIONS::Default::Imposters}
+	set {ImpostersMC::Game::Settings::ConfirmEjects} to {OPTIONS::Default::ConfirmEjects}
+	set {ImpostersMC::Game::Settings::NumberOfMeetings} to {OPTIONS::Default::NumberOfMeetings}
+	set {ImpostersMC::Game::Settings::MeetingCooldown} to {OPTIONS::Default::MeetingCooldown}
+	set {ImpostersMC::Game::Settings::PlayerSpeed} to {OPTIONS::Default::PlayerSpeed}
+	set {ImpostersMC::Game::Settings::DiscussionTime} to {OPTIONS::Default::DiscussionTime}
+	set {ImpostersMC::Game::Settings::VotingTime} to {OPTIONS::Default::VotingTime}
+	set {ImpostersMC::Game::Settings::KillCooldown} to {OPTIONS::Default::KillCooldown}
+
 	# Add all locations for emergency meeting seats to the Seats variable.
-	add location(120, 34, 388, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-	add location(120, 34, 389, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-	add location(120, 34, 387, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(120, 34, 388, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(120, 34, 389, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(120, 34, 387, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
-	add location(119, 34, 391, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-	add location(118, 34, 391, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-	add location(117, 34, 391, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(119, 34, 391, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(118, 34, 391, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(117, 34, 391, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
-	add location(116, 34, 389, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-	add location(116, 34, 388, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-	add location(116, 34, 387, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(116, 34, 389, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(116, 34, 388, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(116, 34, 387, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
-	add location(117, 34, 386, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-	add location(118, 34, 386, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
-	add location(119, 34, 386, "{@World}" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(117, 34, 386, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(118, 34, 386, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
+	add location(119, 34, 386, "%{OPTIONS::General::World}%" parsed as world) to {ImpostersMC::Game::EmergencyMeeting::Seats::*}
 
 
 
